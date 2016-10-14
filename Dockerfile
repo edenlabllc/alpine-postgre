@@ -13,8 +13,8 @@ ENV REFRESHED_AT=2016-08-30 \
 
 # Configure Postgre version
 ENV PG_MAJOR=9.6 \
-    PG_VERSION=9.6rc1 \
-    GOSU_VERSION=1.9
+    PG_VERSION=9.6.0 \
+    GOSU_VERSION=1.10
 
 # Setup system environment variables
 ENV PATH=/usr/lib/postgresql/$PG_MAJOR/bin:$PATH \
