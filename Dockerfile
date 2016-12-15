@@ -13,7 +13,7 @@ ENV REFRESHED_AT=2016-08-30 \
 
 # Configure Postgre version
 ENV PG_MAJOR=9.6 \
-    PG_VERSION=9.6.0 \
+    PG_VERSION=9.6.1 \
     GOSU_VERSION=1.10
 
 # Setup system environment variables
@@ -75,8 +75,7 @@ RUN mkdir -p /docker-entrypoint-initdb.d && \
     chmod g+s /run/postgresql && \
     chown ${POSTGRES_SYS_USER}: ${PGDATA}/../ /docker-entrypoint-initdb.d
 
-RUN apk update && \
-    apk add --no-cache bash
+RUN apk add --update --no-cache bash
 
 # Expose data volume
 WORKDIR /
