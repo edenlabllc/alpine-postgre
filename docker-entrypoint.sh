@@ -55,6 +55,10 @@ EOWARN
     echo "max_connections = 2048" >> "${PGDATA}/postgresql.conf"
     echo "shared_buffers = 512MB" >> "${PGDATA}/postgresql.conf"
 
+    if [ "${POSTGRES_LOG_STATEMENTS}" ]; then
+      echo "log_statement = 'all'" >> "${PGDATA}/postgresql.conf"
+    fi
+
     : ${POSTGRES_USER:=$POSTGRES_SYS_USER}
     : ${POSTGRES_DB:=$POSTGRES_USER}
     export POSTGRES_USER POSTGRES_DB
