@@ -56,7 +56,7 @@ EOWARN
     echo "shared_buffers = 512MB" >> "${PGDATA}/postgresql.conf"
 
     if [ "${POSTGRES_LOG_STATEMENTS}" ]; then
-      echo "log_statement = 'all'" >> "${PGDATA}/postgresql.conf"
+      echo "log_statement = '${POSTGRES_LOG_STATEMENTS}'" >> "${PGDATA}/postgresql.conf"
     fi
 
     : ${POSTGRES_USER:=$POSTGRES_SYS_USER}
