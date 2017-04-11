@@ -1,11 +1,11 @@
-FROM gliderlabs/alpine:3.4
+FROM alpine:3.5
 MAINTAINER Nebo#15 <support@nebo15.com>
 
 # Important!  Update this no-op ENV variable when this Dockerfile
 # is updated with the current date. It will force refresh of all
 # of the base images and things like `apt-get update` won't be using
 # old cached versions when the Dockerfile is built.
-ENV REFRESHED_AT=2016-08-30 \
+ENV REFRESHED_AT=2017-04-11 \
     LANG=en_US.UTF-8 \
     TERM=xterm \
     POSTGRES_SYS_USER=postgres \
@@ -13,7 +13,7 @@ ENV REFRESHED_AT=2016-08-30 \
 
 # Configure Postgre version
 ENV PG_MAJOR=9.6 \
-    PG_VERSION=9.6.1 \
+    PG_VERSION=9.6.2 \
     GOSU_VERSION=1.10
 
 # Setup system environment variables
@@ -83,7 +83,7 @@ VOLUME ${PGDATA}
 
 # Create entypoint scripts
 COPY docker-entrypoint.sh /bin/docker-entrypoint.sh
-ENTRYPOINT [ "/bin/bash", "/bin/docker-entrypoint.sh" ]
+ENTRYPOINT ["/bin/bash", "/bin/docker-entrypoint.sh"]
 
 # Expose Postgre port
 EXPOSE 5432
