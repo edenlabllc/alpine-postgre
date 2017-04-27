@@ -59,7 +59,7 @@ EOWARN
       echo "log_statement = '${POSTGRES_LOG_STATEMENTS}'" >> "${PGDATA}/postgresql.conf"
     fi
 
-    : ${POSTGRES_USER:=$POSTGRES_SYS_USER}
+    : ${POSTGRES_USER:=postgres}
     : ${POSTGRES_DB:=$POSTGRES_USER}
     export POSTGRES_USER POSTGRES_DB
 
