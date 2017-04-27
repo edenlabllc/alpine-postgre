@@ -8,20 +8,20 @@ MAINTAINER Nebo#15 <support@nebo15.com>
 ENV REFRESHED_AT=2017-04-11 \
     LANG=en_US.UTF-8 \
     TERM=xterm \
-    POSTGRES_SYS_USER=postgres \
     HOME=/
 
 # Configure Postgre version
 ENV PG_MAJOR=9.6 \
     PG_VERSION=9.6.2 \
-    GOSU_VERSION=1.10
+    GOSU_VERSION=1.10 \
+    PG_SHA256=0187b5184be1c09034e74e44761505e52357248451b0c854dddec6c231fe50c9
 
 # Setup system environment variables
 ENV PATH=/usr/lib/postgresql/$PG_MAJOR/bin:$PATH \
     PGDATA=/var/lib/postgresql/data
 
 # Install gosu
-RUN set -x && \
+RUN set -ex; \
     apk add --no-cache --virtual .gosu-deps \
         dpkg \
         gnupg \
@@ -37,29 +37,85 @@ RUN set -x && \
     gosu nobody true && \
     apk --purge del .gosu-deps
 
+# Create PostgreSQL home dir
+RUN set -ex; \
+    postgresHome="$(getent passwd postgres)"; \
+    postgresHome="$(echo "$postgresHome" | cut -d: -f6)"; \
+    [ "$postgresHome" = '/var/lib/postgresql' ]; \
+    mkdir -p "$postgresHome"; \
+    chown -R postgres:postgres "$postgresHome"
+
 # Install PostgreSQL
-RUN apk update && \
-    apk add --no-cache build-base \
-        readline-dev \
-        openssl-dev \
-        zlib-dev \
+RUN set -ex; \
+    apk update && \
+
+    # Build deps
+    apk add --no-cache --virtual .build-deps \
+        bison \
+        coreutils \
+        gcc \
+        libc-dev \
+        libedit-dev \
         libxml2-dev \
-        glib-lang \
+        libxslt-dev \
+        make \
+        openssl-dev \
+        perl \
+        util-linux-dev \
+        zlib-dev \
+        flex \
         wget \
-        gnupg \
         ca-certificates && \
+
+    # Fetching sources
     wget ftp://ftp.postgresql.org/pub/source/v$PG_VERSION/postgresql-$PG_VERSION.tar.bz2 -O /tmp/postgresql-$PG_VERSION.tar.bz2 && \
     tar xvfj /tmp/postgresql-$PG_VERSION.tar.bz2 -C /tmp && \
     cd /tmp/postgresql-$PG_VERSION && \
-    ./configure --enable-integer-datetimes --enable-thread-safety --prefix=/usr/local --with-libedit-preferred --with-openssl && \
-    make world && \
-    make install world && \
+
+    # Build sources
+    awk '$1 == "#define" && $2 == "DEFAULT_PGSOCKET_DIR" && $3 == "\"/tmp\"" { $3 = "\"/run/postgresql\""; print; next } { print }' src/include/pg_config_manual.h > src/include/pg_config_manual.h.new && \
+    grep '/run/postgresql' src/include/pg_config_manual.h.new && \
+    mv src/include/pg_config_manual.h.new src/include/pg_config_manual.h && \
+    ./configure \
+        --enable-integer-datetimes \
+        --enable-thread-safety \
+        --enable-tap-tests \
+        --disable-rpath \
+        --with-uuid=e2fs \
+        --with-gnu-ld \
+        --with-pgport=5432 \
+        --with-system-tzdata=/usr/share/zoneinfo \
+        --prefix=/usr/local \
+        --with-includes=/usr/local/include \
+        --with-libraries=/usr/local/lib \
+        --with-libedit-preferred \
+        --with-openssl \
+        --with-libxml \
+        --with-libxslt && \
+    make -j "$(nproc)" world && \
+    make install-world && \
     make -C contrib install && \
+
+    # Get and install runtime deps
+    runDeps="$( \
+      scanelf --needed --nobanner --recursive /usr/local \
+        | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+        | sort -u \
+        | xargs -r apk info --installed \
+        | sort -u \
+    )" && \
+    apk add --no-cache --virtual .postgresql-rundeps \
+        $runDeps \
+        bash \
+        tzdata && \
     cd /tmp/postgresql-$PG_VERSION/contrib && \
     make && \
     make install && \
-    apk --purge del build-base openssl-dev zlib-dev libxml2-dev wget gnupg ca-certificates && \
-    rm -r /tmp/postgresql-$PG_VERSION* /var/cache/apk/*
+    apk --purge del .build-deps && \
+    rm -r /tmp/postgresql-$PG_VERSION* \
+          /var/cache/apk/* \
+          /usr/local/share/doc \
+          /usr/local/share/man
 
 # Performance tuning
 RUN echo "net.core.somaxconn = 3072" >> /etc/sysctl.conf && \
@@ -73,9 +129,8 @@ RUN mkdir -p /docker-entrypoint-initdb.d && \
     chmod -R 700 ${PGDATA} && \
     mkdir -p /run/postgresql && \
     chmod g+s /run/postgresql && \
-    chown ${POSTGRES_SYS_USER}: ${PGDATA}/../ /docker-entrypoint-initdb.d
-
-RUN apk add --update --no-cache bash
+    chown -R postgres:postgres /run/postgresql && \
+    chown postgres:postgres ${PGDATA}/../ /docker-entrypoint-initdb.d
 
 # Expose data volume
 WORKDIR /

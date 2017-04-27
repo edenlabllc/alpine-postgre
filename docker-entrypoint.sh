@@ -2,21 +2,21 @@
 set -e
 
 if [ "${1:0:1}" = '-' ]; then
-  set -- ${POSTGRES_SYS_USER} "$@"
+  set -- postgres "$@"
 fi
 
 if [ "$1" = 'postgres' ]; then
-  echo "Changing directories ownerships to '${POSTGRES_SYS_USER}'.."
+  echo "Changing directories ownerships to 'postgres'.."
   mkdir -p "${PGDATA}"
   chmod 700 "${PGDATA}"
-  chown -R ${POSTGRES_SYS_USER} "${PGDATA}"
+  chown -R postgres "${PGDATA}"
 
   chmod g+s /run/postgresql
-  chown -R ${POSTGRES_SYS_USER} /run/postgresql
+  chown -R postgres /run/postgresql
 
   # look specifically for PG_VERSION, as it is expected in the DB dir
   if [ ! -s "${PGDATA}/PG_VERSION" ]; then
-    eval "gosu ${POSTGRES_SYS_USER} initdb ${POSTGRES_INITDB_ARGS}"
+    eval "gosu postgres initdb ${POSTGRES_INITDB_ARGS}"
 
     # check password first so we can output the warning before postgres
     # messes it up
@@ -46,7 +46,7 @@ EOWARN
 
     # internal start of server in order to allow set-up using psql-client
     # does not listen on external TCP/IP and waits until start finishes
-    gosu ${POSTGRES_SYS_USER} pg_ctl -D "${PGDATA}" \
+    gosu postgres pg_ctl -D "${PGDATA}" \
       -o "-c listen_addresses='localhost'" \
       -w start
 
@@ -65,18 +65,18 @@ EOWARN
 
     psql=( psql -v ON_ERROR_STOP=1 )
 
-    if [ "${POSTGRES_DB}" != "${POSTGRES_SYS_USER}" ]; then
-      "${psql[@]}" --username ${POSTGRES_SYS_USER} <<-EOSQL
+    if [ "${POSTGRES_DB}" != "postgres" ]; then
+      "${psql[@]}" --username postgres <<-EOSQL
         CREATE DATABASE "${POSTGRES_DB}" ;
 EOSQL
       echo
     fi
 
     op='CREATE'
-    if [ "$POSTGRES_USER" = "${POSTGRES_SYS_USER}" ]; then
+    if [ "$POSTGRES_USER" = "postgres" ]; then
       op='ALTER'
     fi
-    "${psql[@]}" --username ${POSTGRES_SYS_USER} <<-EOSQL
+    "${psql[@]}" --username postgres <<-EOSQL
       ${op} USER "${POSTGRES_USER}" WITH SUPERUSER ${pass} ;
 EOSQL
     echo
@@ -94,7 +94,7 @@ EOSQL
       echo
     done
 
-    gosu ${POSTGRES_SYS_USER} pg_ctl -D "$PGDATA" -m fast -w stop
+    gosu postgres pg_ctl -D "$PGDATA" -m fast -w stop
 
     echo
     echo 'PostgreSQL init process complete; ready for start up.'
