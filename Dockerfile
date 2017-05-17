@@ -12,9 +12,9 @@ ENV REFRESHED_AT=2017-04-11 \
 
 # Configure Postgre version
 ENV PG_MAJOR=9.6 \
-    PG_VERSION=9.6.2 \
+    PG_VERSION=9.6.3 \
     GOSU_VERSION=1.10 \
-    PG_SHA256=0187b5184be1c09034e74e44761505e52357248451b0c854dddec6c231fe50c9
+    PG_SHA256=1645b3736901f6d854e695a937389e68ff2066ce0cde9d73919d6ab7c995b9c6
 
 # Setup system environment variables
 ENV PATH=/usr/lib/postgresql/$PG_MAJOR/bin:$PATH \
