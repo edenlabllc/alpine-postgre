@@ -46,6 +46,7 @@ EOWARN
     # messes it up
     if [ "${REPLICATOR_PASSWORD}" ]; then
       repl_pass="PASSWORD '${REPLICATOR_PASSWORD}'"
+      repl_authMethod=md5
     else
       # The - option suppresses leading tabs but *not* spaces. :)
       cat >&2 <<'EOWARN'
@@ -62,9 +63,11 @@ EOWARN
 EOWARN
 
       repl_pass=
+      repl_authMethod=trust
     fi
 
     { echo; echo "host all all 0.0.0.0/0 ${authMethod}"; } >> "${PGDATA}/pg_hba.conf"
+    { echo; echo "host replication all 0.0.0.0/0 ${repl_authMethod}"; } >> "${PGDATA}/pg_hba.conf"
 
     # internal start of server in order to allow set-up using psql-client
     # does not listen on external TCP/IP and waits until start finishes
