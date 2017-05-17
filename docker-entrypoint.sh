@@ -80,6 +80,7 @@ EOWARN
     # This will allow pghoard to backup this database
     echo "wal_level = archive" >> "${PGDATA}/postgresql.conf"
     echo "max_wal_senders = 4" >> "${PGDATA}/postgresql.conf"
+    echo "max_replication_slots = 4" >> "${PGDATA}/postgresql.conf"
 
     if [ "${POSTGRES_LOG_STATEMENTS}" ]; then
       echo "log_statement = '${POSTGRES_LOG_STATEMENTS}'" >> "${PGDATA}/postgresql.conf"
