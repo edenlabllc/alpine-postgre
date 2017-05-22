@@ -146,12 +146,6 @@ EOSQL
   if [ -d "${VOLUMEDIR}/restored_data" ]; then
     chown -R :postgres "${VOLUMEDIR}" 2>/dev/null || :
 
-    mkdir -p "${VOLUMEDIR}/corrupted_data"
-    chmod 700 "${VOLUMEDIR}/corrupted_data" 2>/dev/null || :
-
-    mkdir -p "${VOLUMEDIR}/restored_data"
-    chmod 700 "${VOLUMEDIR}/restored_data" 2>/dev/null || :
-
     echo "Moving old PostgreSQL data to ${VOLUMEDIR}/corrupted_data"
     rm -rf "${VOLUMEDIR}/corrupted_data"
     cp -rf "${PGDATA}" "${VOLUMEDIR}/corrupted_data" && ls -la ${VOLUMEDIR}/corrupted_data
