@@ -145,6 +145,7 @@ EOSQL
   # If "$PGDATA/../restored_data" exists we will replace data directory with it's contents
   if [ -d "${VOLUMEDIR}/restored_data" ]; then
     chown -R :postgres "${VOLUMEDIR}" 2>/dev/null || :
+    ls -la ${VOLUMEDIR}
 
     echo "Moving old PostgreSQL data to ${VOLUMEDIR}/corrupted_data"
     rm -rf "${VOLUMEDIR}/corrupted_data"
