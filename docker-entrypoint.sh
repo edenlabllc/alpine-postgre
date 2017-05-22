@@ -148,7 +148,7 @@ EOSQL
 
     echo "Moving old PostgreSQL data to ${VOLUMEDIR}/corrupted_data"
     rm -rf "${VOLUMEDIR}/corrupted_data"
-    cp -rf "${PGDATA}" "${VOLUMEDIR}/corrupted_data" && ls -la ${VOLUMEDIR}/corrupted_data
+    cp -arf "${PGDATA}/." "${VOLUMEDIR}/corrupted_data" && ls -la ${VOLUMEDIR}/corrupted_data
 
     echo "Moving restored PostgreSQL data to ${PGDATA}"
     rm -rf "${PGDATA}/*"
