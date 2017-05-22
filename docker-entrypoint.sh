@@ -142,8 +142,11 @@ EOSQL
   fi
 
   VOLUMEDIR="$(dirname "${PGDATA}")"
+
   # If "$PGDATA/../restored_data" exists we will replace data directory with it's contents
-  if [ -d "${VOLUMEDIR}/restored_data" ]; then
+  if [ -d "${VOLUMEDIR}/corrupted_data" ]; then
+    echo "WARNING. ${VOLUMEDIR}/corrupted_data is not clean, you need to remove it manually"
+  elif [ -d "${VOLUMEDIR}/restored_data" ]; then
     chown -R :postgres "${VOLUMEDIR}" 2>/dev/null || :
     ls -la ${VOLUMEDIR}
 
@@ -161,10 +164,6 @@ EOSQL
 
     echo "Removing restored data from ${VOLUMEDIR}/restored_data"
     rm -rf "${VOLUMEDIR}/restored_data" || ls -la "${VOLUMEDIR}/restored_data"
-  fi;
-
-  if [ -d "${VOLUMEDIR}/corrupted_data" ]; then
-    echo "WARNING. ${VOLUMEDIR}/corrupted_data is not clean, you need to remove it manually"
   fi;
 fi
 
