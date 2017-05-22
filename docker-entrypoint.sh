@@ -144,7 +144,7 @@ EOSQL
   VOLUMEDIR="$(dirname "${PGDATA}")"
   # If "$PGDATA/../restored_data" exists we will replace data directory with it's contents
   if [ -d "${VOLUMEDIR}/restored_data" ]; then
-    chown -R "$(id -u)" "${VOLUMEDIR}" 2>/dev/null || :
+    chown -R :postgres "${VOLUMEDIR}" 2>/dev/null || :
 
     mkdir -p "${VOLUMEDIR}/corrupted_data"
     chmod 700 "${VOLUMEDIR}/corrupted_data" 2>/dev/null || :
@@ -161,7 +161,7 @@ EOSQL
     cp -arf "${VOLUMEDIR}/restored_data/." "${PGDATA}" && ls -la "${PGDATA}"
 
     echo "Fixing file permissions for ${PGDATA}"
-    chown -R "$(id -u)" "$PGDATA" 2>/dev/null || :
+    chown -R :postgres "$PGDATA" 2>/dev/null || :
     chmod 700 "$PGDATA" 2>/dev/null || :
 
     echo "Removing restored data from ${VOLUMEDIR}/restored_data"
