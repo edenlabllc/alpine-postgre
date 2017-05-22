@@ -147,7 +147,7 @@ EOSQL
   if [ -d "${VOLUMEDIR}/corrupted_data" ]; then
     echo "WARNING. ${VOLUMEDIR}/corrupted_data is not clean, you need to remove it manually"
   elif [ -d "${VOLUMEDIR}/restored_data" ]; then
-    chown -R :postgres "${VOLUMEDIR}" 2>/dev/null || :
+    chown -R postgres:postgres "${VOLUMEDIR}"
     ls -la ${VOLUMEDIR}
 
     echo "Moving old PostgreSQL data to ${VOLUMEDIR}/corrupted_data"
