@@ -1,20 +1,6 @@
 #!/bin/bash
 set -e
 
-VOLUMEDIR="$(dirname "${PGDATA}")"
-# If "$PGDATA/../restored_data" exists we will replace data directory with it's contents
-if [ -d "${VOLUMEDIR}/restored_data" ]; then
-  echo "Moving old PostgreSQL data to ${VOLUMEDIR}/corrupted_data"
-  rm -rf "${VOLUMEDIR}/corrupted_data"
-  mv "$PGDATA" "${VOLUMEDIR}/corrupted_data" && ls -la ${VOLUMEDIR}/corrupted_data
-
-  echo "Moving restored PostgreSQL data to ${PGDATA}"
-  mv "${VOLUMEDIR}/restored_data/*" "$PGDATA" && ls -la $PGDATA
-
-  echo "Removing restored data from ${VOLUMEDIR}/restored_data"
-  rm -rf ${VOLUMEDIR}/restored_data && ls -la ${VOLUMEDIR}/restored_data
-fi;
-
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
 # (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
@@ -154,6 +140,37 @@ EOSQL
     echo 'PostgreSQL init process complete; ready for start up.'
     echo
   fi
+
+  VOLUMEDIR="$(dirname "${PGDATA}")"
+  # If "$PGDATA/../restored_data" exists we will replace data directory with it's contents
+  if [ -d "${VOLUMEDIR}/restored_data" ]; then
+    mkdir -p "${VOLUMEDIR}/corrupted_data"
+    chown -R "$(id -u)" "${VOLUMEDIR}/corrupted_data" 2>/dev/null || :
+    chmod 700 "${VOLUMEDIR}/corrupted_data" 2>/dev/null || :
+
+    mkdir -p "${VOLUMEDIR}/restored_data"
+    chown -R "$(id -u)" "${VOLUMEDIR}/restored_data" 2>/dev/null || :
+    chmod 700 "${VOLUMEDIR}/restored_data" 2>/dev/null || :
+
+    echo "Moving old PostgreSQL data to ${VOLUMEDIR}/corrupted_data"
+    rm -rf "${VOLUMEDIR}/corrupted_data"
+    cp -rf "${PGDATA}" "${VOLUMEDIR}/corrupted_data" && ls -la ${VOLUMEDIR}/corrupted_data
+
+    echo "Moving restored PostgreSQL data to ${PGDATA}"
+    rm -rf "${PGDATA}/*"
+    cp -arf "${VOLUMEDIR}/restored_data/." "${PGDATA}" && ls -la "${PGDATA}"
+
+    echo "Fixing file permissions for ${PGDATA}"
+    chown -R "$(id -u)" "$PGDATA" 2>/dev/null || :
+    chmod 700 "$PGDATA" 2>/dev/null || :
+
+    echo "Removing restored data from ${VOLUMEDIR}/restored_data"
+    rm -rf "${VOLUMEDIR}/restored_data" || ls -la "${VOLUMEDIR}/restored_data"
+  fi;
+
+  if [ -d "${VOLUMEDIR}/corrupted_data" ]; then
+    echo "WARNING. ${VOLUMEDIR}/corrupted_data is not clean, you need to remove it manually"
+  fi;
 fi
 
 exec "$@"
