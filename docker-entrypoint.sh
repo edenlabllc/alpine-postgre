@@ -144,12 +144,12 @@ EOSQL
   VOLUMEDIR="$(dirname "${PGDATA}")"
   # If "$PGDATA/../restored_data" exists we will replace data directory with it's contents
   if [ -d "${VOLUMEDIR}/restored_data" ]; then
+    chown -R "$(id -u)" "${VOLUMEDIR}" 2>/dev/null || :
+
     mkdir -p "${VOLUMEDIR}/corrupted_data"
-    chown -R "$(id -u)" "${VOLUMEDIR}/corrupted_data" 2>/dev/null || :
     chmod 700 "${VOLUMEDIR}/corrupted_data" 2>/dev/null || :
 
     mkdir -p "${VOLUMEDIR}/restored_data"
-    chown -R "$(id -u)" "${VOLUMEDIR}/restored_data" 2>/dev/null || :
     chmod 700 "${VOLUMEDIR}/restored_data" 2>/dev/null || :
 
     echo "Moving old PostgreSQL data to ${VOLUMEDIR}/corrupted_data"
