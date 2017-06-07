@@ -53,6 +53,11 @@ if [ "$1" = 'postgres' ]; then
   chown -R "$(id -u)" "$PGDATA" 2>/dev/null || :
   chmod 700 "$PGDATA" 2>/dev/null || :
 
+  echo "Lising PGDATA"
+  ls -la ${PGDATA}
+  echo "Lising PGDATA../"
+  ls -la ${PGDATA}/../
+
   # look specifically for PG_VERSION, as it is expected in the DB dir
   if [ ! -s "$PGDATA/PG_VERSION" ]; then
     echo
