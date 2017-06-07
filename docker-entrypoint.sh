@@ -48,12 +48,17 @@ if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
 fi
 
 if [ "$1" = 'postgres' ]; then
+  echo "Fixing permissions for ${PGDATA}"
   mkdir -p "$PGDATA"
   chown -R "$(id -u)" "$PGDATA" 2>/dev/null || :
   chmod 700 "$PGDATA" 2>/dev/null || :
 
   # look specifically for PG_VERSION, as it is expected in the DB dir
   if [ ! -s "$PGDATA/PG_VERSION" ]; then
+    echo
+    echo "${PGDATA}/PG_VERSION is empty or not found, initializing database"
+    echo
+
     file_env 'POSTGRES_INITDB_ARGS'
     if [ "$POSTGRES_INITDB_XLOGDIR" ]; then
       export POSTGRES_INITDB_ARGS="$POSTGRES_INITDB_ARGS --xlogdir $POSTGRES_INITDB_XLOGDIR"
