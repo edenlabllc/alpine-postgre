@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+echo "Lising PGDATA"
+ls -la ${PGDATA}
+echo "Lising PGDATA../"
+ls -la ${PGDATA}/../
+
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
 # (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
@@ -176,5 +181,10 @@ EOSQL
     rm -rf "${VOLUMEDIR}/restored_data" || ls -la "${VOLUMEDIR}/restored_data"
   fi;
 fi
+
+echo "Lising PGDATA3"
+ls -la ${PGDATA}
+echo "Lising PGDATA3/../"
+ls -la ${PGDATA}/../
 
 exec "$@"
