@@ -9,6 +9,7 @@ ENV TERM=xterm \
     HOME=/
 
 WORKDIR /
+VOLUME /var/lib/postgresql
 
 COPY /docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/
 COPY docker-entrypoint.sh /usr/local/bin/
