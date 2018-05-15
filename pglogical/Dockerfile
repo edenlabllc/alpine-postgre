@@ -5,6 +5,7 @@ MAINTAINER Nebo#15 <support@nebo15.com>
 ENV TERM=xterm \
     HOME=/
 COPY pglogical-2.0.1.tar.bz2 /
+COPY pgaudit-1.1.1.tar.gz /
 
 # alpine includes "postgres" user/group in base install
 #   /etc/passwd:22:postgres:x:70:70::/var/lib/postgresql:/bin/sh
@@ -134,7 +135,22 @@ RUN set -ex \
    && cd ..  \
    && rm -rf pglogical-2.0.* \
    && rm -rf /pglogical-2.0.1.tar.bz2 \
-   && apk del .fetch-deps .build-deps  \
+   && chown -R postgres /usr/src/postgresql \
+   && chown -R postgres /usr/local/share/postgresql \
+   && chown -R postgres /usr/local/share/doc/postgresql \
+   && chown -R postgres /usr/local/lib/postgresql \
+   && chown -R postgres /usr/local/bin \
+   && cd /usr/src/postgresql/contrib \
+   && tar xvzf /pgaudit-1.1.1.tar.gz -C /usr/src/postgresql/contrib \
+   && mv pgaudit-1.1.1 pgaudit \
+   && chown -R postgres /usr/src/postgresql/contrib/pgaudit \
+   && cd pgaudit \
+   && su-exec postgres make -s check \
+   && su-exec postgres make install \
+   && cd ..  \
+   && rm -rf pgaudit \
+   && rm -rf /pgaudit-1.1.1.tar.gz \
+   && apk del .fetch-deps .build-deps \
    && cd / \
    && rm -rf \
     /usr/src/postgresql \
